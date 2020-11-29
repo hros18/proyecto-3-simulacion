@@ -42,7 +42,17 @@ class Environment:
         x, y = rnd_choice(cells)
         for corral in self.corrals: 
             self.env[x][y].set_obj(corral)
-            x, y = rnd_choice(cells, pred= lambda z: z in self.adj((x, y)))
+            try:
+                x, y = rnd_choice(cells, pred= lambda z: z in self.adj((x, y)))
+            except:
+                self.reset()
+                return
+
+        if self.agent:
+            x, y = rnd_choice(cells)
+            self.env[x][y].set_agent(self.agent)
+        else:
+            self.agent = rnd_choice(cells)
 
         for obj in self.kids + self.obstacles:
             x, y = rnd_choice(cells)
@@ -73,7 +83,7 @@ class Environment:
             y = kid.y
 
             adjs = self.directions(x, y)
-            pkid = list(filter(lambda z: isinstance(self.env[z[0]][z[1]].obj, kid), adjs))
+            pkid = list(filter(lambda z: isinstance(self.env[z[0]][z[1]].obj, Kid), adjs))
             empties = list(filter(lambda z: self.env[z[0]][z[1]].is_empty, adjs))
             count = len(pkid)
             new_trash = rnd.randint(0, (count * (count == 1) + 3 * (count == 2) + 6*(count >= 3)))
@@ -91,8 +101,6 @@ class Environment:
             else:
                 pass
 
-        # put trash in env
-        print(dirs)
         for pos, cnt in dirs:
             for tx, ty in rnd_many(pos, cnt):
                 if self.env[tx][ty].is_empty: 
@@ -112,7 +120,8 @@ class Environment:
 
     def adj(self, pos, pred=None, not_stay=True):
         adjs = []
-        for d in cardinals[not_stay:]:
+        # print('pos=',pos)
+        for d in directions[not_stay:]:
             x = pos[0] + d[0]
             y = pos[1] + d[1]
             if self.is_inside(x, y):
@@ -140,9 +149,9 @@ class Environment:
         return 0 <= x < self.N and 0 <= y < self.M
 
     def is_clean(self):
-        return self.dirty == 0 and all(c.with_child for c in self.corrals)
+        return self.dirty == 0 and all(c.with_kid for c in self.corrals)
     
-    def trash_pc(self):
+    def garbage_pc(self):
         return round((self.dirty / ((self.N * self.M) - len(self.corrals) - len(self.kids) - len(self.obstacles) - 1)), 2)
 
     def __str__(self):
@@ -153,6 +162,7 @@ def gen_env(agent):
     M = rnd.randint(5, 12)
     t = rnd.randint(5, 8)
     dp = rnd.randint(15, 35)
+    # print('dp ', dp)
     bp = rnd.randint(10, 15)
     kidn = rnd.randint(2, 6)
 
