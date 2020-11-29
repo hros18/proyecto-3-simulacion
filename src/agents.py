@@ -83,7 +83,7 @@ class Proactive(Agent):
 
     def see(self, env):
         pos = (self.x, self.y)
-        dp = env.trash_pc()
+        dp = env.garbage_pc()
         if not self.carry and len(env.kids):
             self.looked = near_obj(pos, env, ["k"])
         elif self.carry:

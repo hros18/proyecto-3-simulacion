@@ -70,7 +70,7 @@ class Cell:
         else:
             return "_"
 
-def rnd(l, pred=None, count=1):
+def rnd_choice(l, pred=None, count=1):
     nl = l
     if pred:
         nl = list(filter(pred, l))

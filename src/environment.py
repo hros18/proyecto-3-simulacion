@@ -1,5 +1,5 @@
 from helpers import *
-
+import random as rnd
 cardinals = [
     (0, 0),
     (-1, 0),
@@ -28,7 +28,7 @@ class Environment:
         self.agent = agent
         self.env = []
         self.corrals = [ Corral() for _ in range(kidn) ]
-        self.kids = [ kid() for _ in range(kidn) ]
+        self.kids = [ Kid() for _ in range(kidn) ]
         self.obstacles = [ Obstacle() for _  in range(int( (bp*N*M)/100 )) ]
         self.dirty = int( (dp*N*M)/100 )
 
@@ -39,17 +39,17 @@ class Environment:
         cells = [ (r, c) for r in range(self.N) for c in range(self.M) ]
         rnd.shuffle(cells)
 
-        x, y = rnd(cells)
+        x, y = rnd_choice(cells)
         for corral in self.corrals: 
             self.env[x][y].set_obj(corral)
-            x, y = rnd(cells, pred= lambda z: z in self.adj((x, y)))
+            x, y = rnd_choice(cells, pred= lambda z: z in self.adj((x, y)))
 
         for obj in self.kids + self.obstacles:
-            x, y = rnd(cells)
+            x, y = rnd_choice(cells)
             self.env[x][y].set_obj(obj)
 
         for _ in range(self.dirty):
-            x, y = rnd(cells)
+            x, y = rnd_choice(cells)
             self.env[x][y].dirty = True
 
     def next(self):
@@ -147,3 +147,13 @@ class Environment:
 
     def __str__(self):
         return '\n'.join(' '.join(str(self.env[i][j]) for j in range(self.M)) for i in range(self.N))
+
+def gen_env(agent):
+    N = rnd.randint(5, 12)
+    M = rnd.randint(5, 12)
+    t = rnd.randint(5, 8)
+    dp = rnd.randint(15, 35)
+    bp = rnd.randint(10, 15)
+    kidn = rnd.randint(2, 6)
+
+    return Environment(N, M, t, dp, bp, kidn, agent)
