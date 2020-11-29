@@ -21,12 +21,13 @@ directions = [
 ]
 
 class Environment:
-    def __init__(self, N, M, t, dp, bp, kidn):
+    def __init__(self, N, M, t, dp, bp, kidn, agent=None):
         self.N = N
         self.M = M
         self.t = t
+        self.agent = agent
         self.env = []
-        self.cradles = [ Cradle() for _ in range(kidn) ]
+        self.corrals = [ Corral() for _ in range(kidn) ]
         self.kids = [ kid() for _ in range(kidn) ]
         self.obstacles = [ Obstacle() for _  in range(int( (bp*N*M)/100 )) ]
         self.dirty = int( (dp*N*M)/100 )
@@ -39,8 +40,8 @@ class Environment:
         rnd.shuffle(cells)
 
         x, y = rnd(cells)
-        for cradle in self.cradles: 
-            self.env[x][y].set_obj(cradle)
+        for corral in self.corrals: 
+            self.env[x][y].set_obj(corral)
             x, y = rnd(cells, pred= lambda z: z in self.adj((x, y)))
 
         for obj in self.kids + self.obstacles:
@@ -52,7 +53,6 @@ class Environment:
             self.env[x][y].dirty = True
 
     def next(self):
-        """ Change the env to next state """
         def can_move_obstacle(x, y, dir):
             bx, by = x + dir[0], y + dir[1]
             if not self.is_inside(bx, by):
@@ -121,8 +121,29 @@ class Environment:
             adjs = list(filter(pred, adjs))
         return adjs
 
+    def insert_agent(self, x, y, agent):
+        self.env[x][y].set_agent(agent)
+        self.agent = self.env[x][y].agent
+
+    def set_rnd_agent(self, agent):
+        x, y = self.agent
+        self.insert_agent(x, y, agent)
+
+    def move_agent(self, x, y):
+        self.env[self.agent.x][self.agent.y].free_agent()
+        self.insert_agent(x, y, self.agent)
+
+    def remove_kid(self, kid):
+        self.kids.remove(kid)
+
     def is_inside(self, x, y):
         return 0 <= x < self.N and 0 <= y < self.M
+
+    def is_clean(self):
+        return self.dirty == 0 and all(c.with_child for c in self.corrals)
+    
+    def trash_pc(self):
+        return round((self.dirty / ((self.N * self.M) - len(self.corrals) - len(self.kids) - len(self.obstacles) - 1)), 2)
 
     def __str__(self):
         return '\n'.join(' '.join(str(self.env[i][j]) for j in range(self.M)) for i in range(self.N))
