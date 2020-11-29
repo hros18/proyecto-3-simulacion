@@ -22,7 +22,7 @@ class Agent:
             step = 1 + bool(self.carry)
 
             while step:
-                if str(self.looked) == "c":
+                if str(self.looked) == "k":
                     nx, ny = self.compute_next_move((self.looked.x, self.looked.y), env)
                     env.move_agent(nx, ny)
                     if str(env.env[self.x][self.y].obj) == "k":
@@ -30,7 +30,7 @@ class Agent:
                         env.env[self.x][self.y].obj = None
                         env.remove_kid(self.carry)
                 else:
-                    nx, ny = self.compute_next_move((self.looked.x, self.looked.y), env, obs=["X", "C", "k"])
+                    nx, ny = self.compute_next_move((self.looked.x, self.looked.y), env, obs=["O", "C", "k"])
                     env.move_agent(nx, ny)
                 step -= 1
 
@@ -38,7 +38,7 @@ class Agent:
         self.see(env)
         self.action(env)
 
-    def compute_next_move(self, pos, env, obs=["X", "C"]):
+    def compute_next_move(self, pos, env, obs=["O", "C"]):
         x, y = pos
         dx = np.sign(x - self.x)
         dy = np.sign(y - self.y)
@@ -83,7 +83,7 @@ class Proactive(Agent):
 
     def see(self, env):
         pos = (self.x, self.y)
-        dp = env.trash_pc()
+        dp = env.garbage_pc()
         if not self.carry and len(env.kids):
             self.looked = near_obj(pos, env, ["k"])
         elif self.carry:
@@ -113,7 +113,7 @@ def near_obj(pos, env, search):
             else:
                 obj = env.env[x][y]
                 break
-        for ax, ay in env.adj(x, y):
+        for ax, ay in env.directions(x, y):
             if not mark[ax][ay]:
                 queue.append((ax, ay))
     return obj

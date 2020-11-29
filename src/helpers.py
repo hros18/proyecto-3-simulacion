@@ -26,7 +26,7 @@ class Obstacle:
         pass
 
     def __str__(self):
-        return "X"
+        return "O"
 
 class Cell:
     def __init__(self, x, y, obj = None, agent = None, dirty = False):
@@ -66,11 +66,11 @@ class Cell:
         elif self.obj:
             return str(self.obj)
         elif self.dirty:
-            return "*"
+            return "X"
         else:
-            return "_"
+            return "-"
 
-def rnd(l, pred=None, count=1):
+def rnd_choice(l, pred=None, count=1):
     nl = l
     if pred:
         nl = list(filter(pred, l))
