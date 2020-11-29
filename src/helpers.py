@@ -1,14 +1,16 @@
+import random as rnd
+
 class Kid:
     def __init__(self):
         pass
 
     def __str__(self):
-        return "c"    
+        return "k"    
 
     def __hash__(self):
         return self.x ** self.y
 
-class Cradle:
+class Corral:
     def __init__(self):
         self.kid = None
 
@@ -27,10 +29,11 @@ class Obstacle:
         return "X"
 
 class Cell:
-    def __init__(self, x, y, obj = None, dirty = False):
+    def __init__(self, x, y, obj = None, agent = None, dirty = False):
         self.x = x
         self.y = y
         self.obj = obj
+        self.agent = agent
         self.dirty = dirty
 
     def set_obj(self, obj):
@@ -38,8 +41,16 @@ class Cell:
         self.obj.x = self.x
         self.obj.y = self.y
 
+    def set_agent(self, agent):
+        self.agent = agent
+        self.agent.x = self.x
+        self.agent.y = self.y
+
     def free_obj(self):
         self.obj = None
+
+    def free_agent(self):
+        self.agent = None
 
     @property
     def is_dirty(self):
@@ -47,10 +58,12 @@ class Cell:
 
     @property
     def is_empty(self):
-        return self.obj == None and not self.dirty
+        return self.obj == None and self.agent == None and not self.dirty
 
     def __str__(self):
-        if self.obj:
+        if self.agent:
+            return str(self.agent)
+        elif self.obj:
             return str(self.obj)
         elif self.dirty:
             return "*"
